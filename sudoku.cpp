@@ -1,8 +1,11 @@
-﻿#include <iostream>
+#include <iostream>
 #include <fstream>
 #include <vector>
 #include <string>
+#include <thread>
+#include <chrono>
 using namespace std;
+using namespace chrono;
 
 class Cell
 {
@@ -142,18 +145,58 @@ void step(vector<vector<Cell>>& field)
     }
 }
 
+string Time(high_resolution_clock::time_point& start, high_resolution_clock::time_point& end)
+{
+    string result = "";
+
+
+    int h = duration_cast<hours>(end - start).count();
+    int m = duration_cast<minutes>(end - start).count();
+    int s = duration_cast<seconds>(end - start).count();
+    int ms = duration_cast<milliseconds>(end - start).count();
+
+
+    int min = m - h * 60;
+    int sec = s - m * 60;
+    int milsec = ms - s * 1000;
+
+    result += to_string(h) + ":";
+
+    if (to_string(min).size() == 2) result += to_string(min) + ":";
+    else result += "0" + to_string(min) + ":";
+
+    if (to_string(sec).size() == 2) result += to_string(sec) + ":";
+    else result += "0" + to_string(sec) + ":";
+
+    if (to_string(milsec).size() == 3) result += to_string(milsec);
+    else if (to_string(milsec).size() == 2) result += "0" + to_string(milsec);
+    else result += "00" + to_string(milsec);
+
+
+    return result;
+}
+
 int main()
 {
+    high_resolution_clock::time_point start;
+    high_resolution_clock::time_point end;
+
     vector<vector<Cell>> field;
 
     parse(field, "Test/easy test.txt");
 
     output(field);
 
+    start = high_resolution_clock::now();
+
     while (check(field))
     {
         step(field);
     }
 
+    end = high_resolution_clock::now();
+
     output(field);
+
+    cout << endl << "solve time: " << Time(start, end) << endl;
 }
